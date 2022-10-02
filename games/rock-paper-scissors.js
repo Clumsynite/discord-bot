@@ -1,3 +1,7 @@
+// const myCache = require("./../utils/cache");
+const NodeCache = require("node-cache");
+const myCache = new NodeCache({ stdTTL: 0, checkperiod: 0 });
+
 const options = ["Rock", "Paper", "Scissors"];
 
 const RESULT = {
@@ -45,10 +49,33 @@ const checkWhoWon = (user, bot) => {
   if (combinations[user].beats === bot) return RESULT.USER;
   return RESULT.BOT;
 };
+/** Stores Match Result in Cache
+ * @param  {String} userId - discord user's User ID
+ * @param  {'won'|'lost'|'tie'} result - match result
+ * @param  {String} timestamp - time when match was played
+ */
+const storeResult = (userId, result, timestamp) => {
+  const userExists = myCache.get(userId);
+  if (userExists) {
+    console.log("user found in cache");
+    userExists.matches = [...userExists.matches, { result, timestamp }];
+    myCache.set(userId, userExists);
+    console.log("new result added in table");
+  } else {
+    console.log("user not found in cachec");
+    const newUserObject = {
+      userId,
+      matches: [{ result, timestamp }],
+    };
+    myCache.set(userId, newUserObject);
+    console.log("new user and result added in table");
+  }
+};
 
 module.exports = {
   getRandomOption,
   checkIfUserWon,
   RESULT,
   checkWhoWon,
+  storeResult,
 };

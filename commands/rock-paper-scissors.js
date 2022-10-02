@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require("discord.js");
 
-const { getRandomOption, checkWhoWon, RESULT } = require("../games/rock-paper-scissors");
+const { getRandomOption, checkWhoWon, RESULT, storeResult } = require("../games/rock-paper-scissors");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -36,6 +36,12 @@ module.exports = {
       : "I want a REMATCH!. *please*";
 
     const reply = `You Chose ${userChoice}. I chose ${botChoice}.\n${result}\n${remark}`;
+
+    const userId = interaction.user.id;
+
+    const score = isUserWinner ? "won" : matchResult === RESULT.TIE ? "tie" : "lost";
+
+    storeResult(userId, score, new Date().toISOString());
 
     await interaction.reply(reply);
   },
